@@ -3,6 +3,8 @@ import itertools
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
+from PIL import Image
+
 
 
 class CycleGANModel(BaseModel):
@@ -100,7 +102,7 @@ class CycleGANModel(BaseModel):
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
 
-    def set_input(self, input):
+    def set_input(self, input, dataset = None):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
 
         Parameters:
@@ -113,8 +115,18 @@ class CycleGANModel(BaseModel):
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
          
-        print("A_paths", input["A_paths"])
-        print("B_paths", input["B_paths"])
+        #print("A_paths", input["A_paths"])
+        #print("B_paths", input["B_paths"])
+
+        self.target_paths_B = [path.replace("trainA", "trainB") for path in input["A_paths"]]
+        self.target_paths_A = [path.replace("trainB", "trainA") for path in input["B_paths"]]
+
+        #A_img = Image.open(A_path).convert('RGB')
+        #B_img = Image.open(B_path).convert('RGB')
+
+        self.target_images_B = [dataset.transform_B(Image.open(path).convert('RGB')) for path in self.target_paths_B]
+        self.target_images_A = [dataset.transform_A(Image.open(path).convert('RGB')) for path in self.target_paths_A]
+
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
