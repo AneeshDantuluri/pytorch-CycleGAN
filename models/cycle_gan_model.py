@@ -181,9 +181,9 @@ class CycleGANModel(BaseModel):
         self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B
         #calculate mean squared error for both domain A and B
         if self.supervised: 
-          loss_supervised_A = self.criterionSupervised(self.fake_A, self.real_A)
-          loss_supervised_B = self.criterionSupervised(self.fake_B, self.real_B)
-          self.loss_G += loss_supervised_A + loss_supervised_B
+          self.loss_supervised_A = self.criterionSupervised(self.fake_A, self.real_A)
+          self.loss_supervised_B = self.criterionSupervised(self.fake_B, self.real_B)
+          self.loss_G += self.loss_supervised_A + self.loss_supervised_B
 
 
         self.loss_G.backward()
