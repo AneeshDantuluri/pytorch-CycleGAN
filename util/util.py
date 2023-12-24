@@ -106,33 +106,33 @@ def mkdir(path):
 
 def calculate_psnr(img1_tensor, img2_tensor, max_pixel_value=1.0):
     """
-    Calculate the PSNR between two image tensors.
+    Calculate the PSNR between two batches of image tensors.
 
     Args:
-        img1_tensor (torch.Tensor): The first image tensor.
-        img2_tensor (torch.Tensor): The second image tensor.
+        img1_tensor (torch.Tensor): The first batch of image tensors (B, C, H, W).
+        img2_tensor (torch.Tensor): The second batch of image tensors (B, C, H, W).
         max_pixel_value (float): The maximum pixel value in the images. Default is 1.0.
 
     Returns:
-        float: The PSNR value.
+        torch.Tensor: The PSNR values for each image pair in the batch.
     """
 
     # Validate tensor dimensions
-    if img1_tensor.dim() != 3 or img2_tensor.dim() != 3:
-        raise ValueError("Input tensors must be 3-dimensional (C, H, W)")
+    if img1_tensor.dim() != 4 or img2_tensor.dim() != 4:
+        raise ValueError("Input tensors must be 4-dimensional (B, C, H, W)")
 
-    # Calculate MSE
-    mse = torch.mean((img1_tensor - img2_tensor) ** 2)
+    # Calculate MSE for each pair in the batch
+    mse = torch.mean((img1_tensor - img2_tensor) ** 2, dim=[1, 2, 3])
 
-    # Calculate PSNR
-    if mse == 0:
-        # Avoid log(0) error
-        return float('inf')
-    psnr = 20 * math.log10(max_pixel_value / math.sqrt(mse))
+    # Avoid log(0) error for zero MSE
+    mse[mse == 0] = float('inf')
+
+    # Calculate PSNR for each pair
+    psnr = 20 * torch.log10(max_pixel_value) - 10 * torch.log10(mse)
 
     return psnr
+
 # Example usage
-# img1_tensor and img2_tensor should be PyTorch tensors of shape [C, H, W]
-# For example, they can be created using transforms.ToTensor() from PIL images
-# psnr_value = calculate_psnr(img1_tensor, img2_tensor)
-# print(f"PSNR: {psnr_value}")
+# img1_tensor and img2_tensor should be PyTorch tensors of shape [B, C, H, W]
+# psnr_values = calculate_psnr_batch(img1_tensor, img2_tensor)
+# print(f"PSNR for each pair in the batch: {psnr_values}")
