@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from PIL import Image
 import os
+import math
 
 
 def tensor2im(input_image, imtype=np.uint8):
@@ -101,3 +102,37 @@ def mkdir(path):
     """
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def calculate_psnr(img1_tensor, img2_tensor, max_pixel_value=1.0):
+    """
+    Calculate the PSNR between two image tensors.
+
+    Args:
+        img1_tensor (torch.Tensor): The first image tensor.
+        img2_tensor (torch.Tensor): The second image tensor.
+        max_pixel_value (float): The maximum pixel value in the images. Default is 1.0.
+
+    Returns:
+        float: The PSNR value.
+    """
+
+    # Validate tensor dimensions
+    if img1_tensor.dim() != 3 or img2_tensor.dim() != 3:
+        raise ValueError("Input tensors must be 3-dimensional (C, H, W)")
+
+    # Calculate MSE
+    mse = torch.mean((img1_tensor - img2_tensor) ** 2)
+
+    # Calculate PSNR
+    if mse == 0:
+        # Avoid log(0) error
+        return float('inf')
+    psnr = 20 * math.log10(max_pixel_value / math.sqrt(mse))
+
+    return psnr
+# Example usage
+# img1_tensor and img2_tensor should be PyTorch tensors of shape [C, H, W]
+# For example, they can be created using transforms.ToTensor() from PIL images
+# psnr_value = calculate_psnr(img1_tensor, img2_tensor)
+# print(f"PSNR: {psnr_value}")

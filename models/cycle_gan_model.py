@@ -4,6 +4,7 @@ from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
 from PIL import Image
+from util.util import calculate_psnr
 
 
 
@@ -54,7 +55,7 @@ class CycleGANModel(BaseModel):
         """
         BaseModel.__init__(self, opt)
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
-        self.loss_names = ['D_A', 'G_A', 'cycle_A', 'idt_A', 'D_B', 'G_B', 'cycle_B', 'idt_B', 'supervised_A', 'supervised_B']
+        self.loss_names = ['D_A', 'G_A', 'cycle_A', 'idt_A', 'D_B', 'G_B', 'cycle_B', 'idt_B', 'supervised_A', 'supervised_B', 'PSNR_A', 'PSNR_B']
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
         visual_names_A = ['real_A', 'fake_B', 'rec_A']
         visual_names_B = ['real_B', 'fake_A', 'rec_B']
@@ -199,7 +200,8 @@ class CycleGANModel(BaseModel):
           self.loss_supervised_A = self.criterionSupervised(self.fake_A, self.real_A)
           self.loss_supervised_B = self.criterionSupervised(self.fake_B, self.real_B)
           self.loss_G += self.loss_supervised_A + self.loss_supervised_B
-
+          self.loss_PSNR_A = calculate_psnr(self.fake_A, self.real_A)
+          self.loss_PSNR_B = calculate_psnr(self.fake_B, self.real_B)
 
         self.loss_G.backward()
 
