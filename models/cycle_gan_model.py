@@ -124,8 +124,8 @@ class CycleGANModel(BaseModel):
         #A_img = Image.open(A_path).convert('RGB')
         #B_img = Image.open(B_path).convert('RGB')
 
-        self.target_images_B = [dataset.transform_B(Image.open(path).convert('RGB')) for path in self.target_paths_B]
-        self.target_images_A = [dataset.transform_A(Image.open(path).convert('RGB')) for path in self.target_paths_A]
+        self.target_images_B = [dataset.dataset.transform_B(Image.open(path).convert('RGB')) for path in self.target_paths_B]
+        self.target_images_A = [dataset.dataset.transform_A(Image.open(path).convert('RGB')) for path in self.target_paths_A]
 
 
     def forward(self):
