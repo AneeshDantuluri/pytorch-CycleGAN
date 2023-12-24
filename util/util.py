@@ -130,7 +130,7 @@ def calculate_psnr(img1_tensor, img2_tensor, max_pixel_value=1.0):
     # Calculate PSNR for each pair
     psnr = 20 * torch.log10(max_pixel_value) - 10 * torch.log10(mse)
 
-    return psnr
+    return psnr.mean()
 
 # Example usage
 # img1_tensor and img2_tensor should be PyTorch tensors of shape [B, C, H, W]
