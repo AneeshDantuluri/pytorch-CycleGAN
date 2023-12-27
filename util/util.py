@@ -120,6 +120,11 @@ def calculate_psnr(img1_tensor, img2_tensor, max_pixel_value=1.0):
     # Validate tensor dimensions
     if img1_tensor.dim() != 4 or img2_tensor.dim() != 4:
         raise ValueError("Input tensors must be 4-dimensional (B, C, H, W)")
+    
+    #Validate max pixel value
+    if img1_tensor.max() > max_pixel_value or img2_tensor.max() > max_pixel_value:
+        raise ValueError(f"input tensors contain value exceeding max pixel value of {max_pixel_value}.")
+
 
     # Calculate MSE for each pair in the batch
     mse = torch.mean((img1_tensor - img2_tensor) ** 2, dim=[1, 2, 3])
@@ -128,7 +133,7 @@ def calculate_psnr(img1_tensor, img2_tensor, max_pixel_value=1.0):
     mse[mse == 0] = float('inf')
 
     # Calculate PSNR for each pair
-    psnr = 20 * torch.log10(max_pixel_value) - 10 * torch.log10(mse)
+    psnr = 20 * torch.log10(torch.tensor(max_pixel_value)) - 10 * torch.log10(mse)
 
     return psnr.mean()
 
